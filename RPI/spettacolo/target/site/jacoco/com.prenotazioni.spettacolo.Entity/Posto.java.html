@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Posto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spettacolo</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.spettacolo.Entity</a> &gt; <span class="el_source">Posto.java</span></div><h1>Posto.java</h1><pre class="source lang-java linenums">package com.prenotazioni.spettacolo.Entity;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import lombok.Getter;
+import lombok.Setter;
+
+public class Posto {
+
+<span class="pc" id="L12">    @Getter @Setter @NotNull @Size(min =1, max =1, message = &quot;only one letter&quot;) </span>
+    private String riga;
+
+<span class="pc" id="L15">    @Getter @Setter @NotNull @Min(1) @Max(2) </span>
+    private int colonna;
+
+    private boolean free;
+
+<span class="fc" id="L20">    public Posto(String riga, int colonna, boolean free){</span>
+<span class="fc" id="L21">        this.riga = riga;</span>
+<span class="fc" id="L22">        this.colonna = colonna;</span>
+<span class="fc" id="L23">        this.free = free;</span>
+<span class="fc" id="L24">    }</span>
+
+<span class="fc" id="L26">    public Posto(){}</span>
+
+    public boolean getFree(){
+<span class="fc" id="L29">        return free;</span>
+    }
+
+    public void setFree(boolean free){
+<span class="fc" id="L33">        this.free = free;</span>
+<span class="fc" id="L34">    }</span>
+
+    public String toString(){
+<span class="fc" id="L37">        return &quot;      {riga: &quot;+riga+&quot;, colonna: &quot;+colonna+&quot;, free: &quot;+free+&quot;}&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

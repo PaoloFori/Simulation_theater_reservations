@@ -1,0 +1,4 @@
+com\prenotazioni\spettacolo\SpettacoloApplicationTests.class
+com\prenotazioni\spettacolo\TestControllerCommand.class
+com\prenotazioni\spettacolo\TestControllerQuery.class
+com\prenotazioni\spettacolo\TestException.class

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpettacoloControllerCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spettacolo</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.spettacolo.Controller</a> &gt; <span class="el_source">SpettacoloControllerCommand.java</span></div><h1>SpettacoloControllerCommand.java</h1><pre class="source lang-java linenums">package com.prenotazioni.spettacolo.Controller;
+
+import java.util.List;
+
+import com.prenotazioni.spettacolo.Entity.Posto;
+import com.prenotazioni.spettacolo.Entity.Sala;
+import com.prenotazioni.spettacolo.Entity.Spettacolo;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoSala;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoSpettacolo;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoPosto;
+import com.prenotazioni.spettacolo.Services.SpettacoloServiceCommand;
+import com.prenotazioni.spettacolo.Services.SpettacoloServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@RestController
+<span class="fc" id="L24">public class SpettacoloControllerCommand {</span>
+    @Autowired
+    SpettacoloServiceCommand spettacoloServiceCommand;
+
+    @Autowired
+    SpettacoloServiceQuery spettacoloServiceQuery;
+
+    /**
+     * Insert a New Show
+     * @param spettacolo
+     * @return
+     */
+    @PutMapping(&quot;/Teatro/addNewShowAndNewSala&quot;)
+    public String insertNewShow(@RequestBody Spettacolo spettacolo){
+<span class="fc" id="L38">        return spettacoloServiceCommand.insertNewSpettacoloAndSala(spettacolo);</span>
+    }
+
+    /**
+     * Insert a New Show knowning sale
+     * @param show
+     * @param cost
+     * @param numeroSale
+     * @return
+     */
+    @PutMapping(&quot;/Teatro/addNewShowKnowSala&quot;)
+    public String insertNewShowKnewSala(@RequestParam(value = &quot;show&quot;)String show, @RequestParam(value = &quot;cost&quot;) int cost, 
+            @RequestParam(value = &quot;listNumeroSale&quot;) List&lt;Integer&gt; numeroSale){
+<span class="fc" id="L51">        return spettacoloServiceCommand.insertNewShowWithExistsSala(show, cost, numeroSale);</span>
+    }
+
+    /**
+     * Add new sala for the show
+     * @param spettacolo
+     * @param sala
+     * @return
+     */
+    @PostMapping(&quot;/Teatro/{show}/addNewSala&quot;)
+    public String addSalaByShow(@PathVariable(&quot;show&quot;)String spettacolo, @RequestBody Sala sala){
+        try{
+<span class="fc" id="L63">            return spettacoloServiceCommand.insertSalaBySpettacolo(spettacolo, sala);</span>
+<span class="fc" id="L64">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L65">            return &quot;No Show with this name &quot; + spettacolo;</span>
+        }
+    }
+
+    @PostMapping(&quot;/Teatro/{show}/addExistSala&quot;)
+    public String addExistsSalaByShow(@PathVariable(&quot;show&quot;)String spettacolo, @RequestParam(value = &quot;listaNumeroSale&quot;) List&lt;Integer&gt; numeroSale){
+        try{
+<span class="fc" id="L72">            return spettacoloServiceCommand.insertAlreadyExistsSalaByShow(spettacolo, numeroSale);</span>
+<span class="fc" id="L73">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L74">            return &quot;No Show with this name &quot; + spettacolo;</span>
+        }
+    }
+
+    /**
+     * Delete show
+     * @param spettacolo
+     * @return
+     */
+    @DeleteMapping(&quot;/Teatro/deleteShow&quot;)
+    public String deleteEverythingByShow(@RequestParam(value = &quot;show&quot;) String spettacolo){
+        try{
+<span class="fc" id="L86">            return spettacoloServiceCommand.deleteEverythingByShow(spettacolo);</span>
+<span class="fc" id="L87">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L88">            return &quot;No Show with this name &quot;+ spettacolo;</span>
+        }
+    }
+
+    /**
+     * Delete a Sala by Show and numeroSala
+     * @return
+     */
+    @DeleteMapping(&quot;/Teatro/{show}/deleteSala&quot;)
+    public String deleteSalaByShowAndNumeroSala(@PathVariable(&quot;show&quot;)String show, @RequestParam(value= &quot;numeroSala&quot;) int numeroSala){
+        try{
+<span class="fc" id="L99">            return spettacoloServiceCommand.deleteSalaByNumeroSalaAndShow(show, numeroSala);</span>
+<span class="fc" id="L100">        }catch(ExceptionNoSala e){</span>
+<span class="fc" id="L101">            return &quot;No Sala: &quot;+numeroSala +&quot; for show: &quot; + show;</span>
+<span class="fc" id="L102">        }catch(ExceptionNoSpettacolo e1){</span>
+<span class="fc" id="L103">            return &quot;No Show with this name &quot;+ show;</span>
+        }
+    }
+
+    /**
+     * Upset Posto by numeroSala and show
+     * @param spettacolo: name of Show
+     * @param numeroSala: number of sala
+     * @param posto: Posto in sala for the show
+     * @return
+     */
+    @PostMapping(&quot;/Teatro/{show}/{numeroSala}/upsetPosto&quot;)
+    public String upsetPostoByShowAndNumeroSala(@PathVariable(&quot;show&quot;)String spettacolo, @PathVariable(&quot;numeroSala&quot;) int numeroSala, 
+            @RequestParam(value = &quot;colonna&quot;) int colonna, @RequestParam(value = &quot;riga&quot;)String riga, @RequestParam(value = &quot;free&quot;) boolean free){
+        try{
+<span class="fc" id="L118">            Posto posto = new Posto(riga, colonna, free);</span>
+<span class="fc" id="L119">            return spettacoloServiceCommand.setPostoByTitoloAnNumeroSalaAndPosto(spettacolo, numeroSala, posto).toString();</span>
+<span class="fc" id="L120">        }catch(ExceptionNoSala e){</span>
+<span class="fc" id="L121">            return &quot;No sala with numeroSala: &quot; + numeroSala;</span>
+<span class="fc" id="L122">        }catch(ExceptionNoSpettacolo e1){</span>
+<span class="fc" id="L123">            return &quot;No show with name: &quot; + spettacolo;</span>
+<span class="fc" id="L124">        }catch(ExceptionNoPosto e2){</span>
+<span class="fc" id="L125">            return &quot;Not exists posto: &quot; + riga.toUpperCase() + colonna + &quot; for sala: &quot; + numeroSala;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
