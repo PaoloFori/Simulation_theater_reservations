@@ -1,0 +1,14 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+spettacolo,com.prenotazioni.spettacolo.Config,SwaggerConfig,0,34,0,0,0,9,0,3,0,3
+spettacolo,com.prenotazioni.spettacolo.Config,KafkaPublisherConfig,0,36,0,0,0,8,0,4,0,4
+spettacolo,com.prenotazioni.spettacolo.Entity,Spettacolo,3,176,0,8,0,37,1,17,1,13
+spettacolo,com.prenotazioni.spettacolo.Entity,Posto,8,36,0,0,0,12,2,7,2,7
+spettacolo,com.prenotazioni.spettacolo.Entity,Sala,6,68,0,4,3,15,1,9,1,7
+spettacolo,com.prenotazioni.spettacolo,SpettacoloApplication,5,502,0,0,2,22,1,2,1,2
+spettacolo,com.prenotazioni.spettacolo.Controller,SpettacoloControllerQuery,0,105,0,2,0,28,0,9,0,8
+spettacolo,com.prenotazioni.spettacolo.Controller,SpettacoloControllerCommand,0,164,1,1,0,47,1,8,0,8
+spettacolo,com.prenotazioni.spettacolo.Services,SpettacoloServiceCommand,75,655,20,82,18,156,18,42,0,9
+spettacolo,com.prenotazioni.spettacolo.Services,SpettacoloServiceQuery,0,336,0,36,0,86,0,26,0,8
+spettacolo,com.prenotazioni.spettacolo.Exception,ExceptionNoSala,0,3,0,0,0,2,0,1,0,1
+spettacolo,com.prenotazioni.spettacolo.Exception,ExceptionNoPosto,0,3,0,0,0,2,0,1,0,1
+spettacolo,com.prenotazioni.spettacolo.Exception,ExceptionNoSpettacolo,0,3,0,0,0,1,0,1,0,1

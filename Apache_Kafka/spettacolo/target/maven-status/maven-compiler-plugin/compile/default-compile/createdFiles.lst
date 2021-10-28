@@ -1,0 +1,14 @@
+com\prenotazioni\spettacolo\Config\KafkaPublisherConfig.class
+com\prenotazioni\spettacolo\Entity\Posto.class
+com\prenotazioni\spettacolo\Services\SpettacoloServiceCommand.class
+com\prenotazioni\spettacolo\Entity\Sala.class
+com\prenotazioni\spettacolo\Repository\SpettacoloRepository.class
+com\prenotazioni\spettacolo\Exception\ExceptionNoSala.class
+com\prenotazioni\spettacolo\Exception\ExceptionNoPosto.class
+com\prenotazioni\spettacolo\Services\SpettacoloServiceQuery.class
+com\prenotazioni\spettacolo\Config\SwaggerConfig.class
+com\prenotazioni\spettacolo\Controller\SpettacoloControllerCommand.class
+com\prenotazioni\spettacolo\Entity\Spettacolo.class
+com\prenotazioni\spettacolo\Exception\ExceptionNoSpettacolo.class
+com\prenotazioni\spettacolo\SpettacoloApplication.class
+com\prenotazioni\spettacolo\Controller\SpettacoloControllerQuery.class

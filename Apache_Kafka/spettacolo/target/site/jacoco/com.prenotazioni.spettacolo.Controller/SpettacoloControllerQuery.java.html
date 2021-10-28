@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpettacoloControllerQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spettacolo</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.spettacolo.Controller</a> &gt; <span class="el_source">SpettacoloControllerQuery.java</span></div><h1>SpettacoloControllerQuery.java</h1><pre class="source lang-java linenums">package com.prenotazioni.spettacolo.Controller;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.prenotazioni.spettacolo.Entity.Sala;
+import com.prenotazioni.spettacolo.Entity.Spettacolo;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoSala;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoSpettacolo;
+import com.prenotazioni.spettacolo.Services.SpettacoloServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L20">public class SpettacoloControllerQuery {</span>
+
+    @Autowired
+    SpettacoloServiceQuery spettacoloServiceQuery;
+
+    /**
+     * Show all shows
+     * @return list with all show
+     */
+    @GetMapping(value =&quot;/Teatro/shows&quot;)
+    public List&lt;Spettacolo&gt; getAll(){
+<span class="fc" id="L31">        return spettacoloServiceQuery.getAll();</span>
+    }
+    
+    /**
+     * Show a determinate show.
+     * @param spettacolo: name of show
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}&quot;)
+    public String getShow(@PathVariable(&quot;show&quot;) String spettacolo){
+        try{
+<span class="fc" id="L42">            return spettacoloServiceQuery.getSpettacolo(spettacolo).toString();</span>
+<span class="fc" id="L43">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L44">            return &quot;No Spettacolo with name: &quot; + spettacolo;</span>
+        }
+    }
+
+    /**
+     * Show a determinate show and Sala
+     * @param spettacolo: name of show
+     * @param numeroSala: number of sala
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}/{numeroSala}&quot;)
+    public String getShowByShowAndNumeroSala(@PathVariable(&quot;show&quot;) String spettacolo, @PathVariable(&quot;numeroSala&quot;) int numeroSala){
+        try{
+<span class="fc" id="L57">            return spettacoloServiceQuery.getSpettacoloBySpettacoloAndNumeroSala(spettacolo, numeroSala).toString();</span>
+<span class="fc" id="L58">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L59">            return &quot;No show with name: &quot; + spettacolo;</span>
+<span class="fc" id="L60">        }catch(ExceptionNoSala e1){</span>
+<span class="fc" id="L61">            return &quot;No sala: &quot; + numeroSala + &quot; for show: &quot; + spettacolo;</span>
+        }
+    }
+
+    /**
+     * Get costo by the Show selected
+     * @param spettacolo: name of show
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value=&quot;/Teatro/show&quot;)
+    public String getCostoBySpettacolo(@RequestParam(value = &quot;show&quot;) String spettacolo) {
+        try{
+<span class="fc" id="L73">            return &quot;show: &quot;+spettacolo+&quot;, costs: &quot; + spettacoloServiceQuery.getCostoBySpettacolo(spettacolo);</span>
+<span class="fc" id="L74">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L75">            return &quot;No Show with name: &quot; + spettacolo;</span>
+        }
+    }
+    
+    /**
+     * Get all Sala for the show passed
+     * @param spettacolo: name of show
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}/sale&quot;)
+    public List&lt;String&gt; getAllSalaBySpettacolo(@PathVariable(&quot;show&quot;) String spettacolo){
+        try{
+<span class="fc" id="L87">            List&lt;String&gt; listOfSala = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            for(Sala sala : spettacoloServiceQuery.getSaleBySpettacolo(spettacolo)){</span>
+<span class="fc" id="L89">                listOfSala.add(sala.toString());</span>
+<span class="fc" id="L90">            }</span>
+<span class="fc" id="L91">            return listOfSala;</span>
+<span class="fc" id="L92">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L93">            return Arrays.asList(&quot;No spettacolo with name: &quot; + spettacolo);</span>
+        }
+    }
+
+    /**
+     * Get all Free Posto in all Sala for that show
+     * @param spettacolo: name of show
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}/freePosti&quot;)
+    public String getAllFreePostoPerAllSalaByShow(@PathVariable(&quot;show&quot;) String spettacolo){
+        try{
+<span class="fc" id="L105">            return spettacoloServiceQuery.getAllFreePostoPerAllSalaByShow(spettacolo).toString();</span>
+<span class="fc" id="L106">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L107">            return &quot;No spettacolo with name: &quot; + spettacolo;</span>
+        }
+    }
+
+    /**
+     * Get all Free Posto for Sala and Show passed
+     * @param spettacolo: name of show
+     * @param numeroSala: number of sala
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}/{numeroSala}/freePosti&quot;)
+    public String getAllFreePostoByShowAndNumeroSala(@PathVariable(&quot;show&quot;)String spettacolo, @PathVariable(&quot;numeroSala&quot;) int numeroSala){
+        try{
+<span class="fc" id="L120">            return spettacoloServiceQuery.getAllFreePostoBySpettacoloAndNumeroSala(spettacolo, numeroSala).toString();</span>
+<span class="fc" id="L121">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L122">            return &quot;No spettacolo with name: &quot; + spettacolo;</span>
+<span class="fc" id="L123">        }catch(ExceptionNoSala e1){</span>
+<span class="fc" id="L124">            return &quot;No sala: &quot; + numeroSala + &quot; for show: &quot; + spettacolo;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

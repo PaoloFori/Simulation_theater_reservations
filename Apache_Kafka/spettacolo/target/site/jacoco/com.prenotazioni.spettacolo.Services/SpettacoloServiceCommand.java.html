@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpettacoloServiceCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">spettacolo</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.spettacolo.Services</a> &gt; <span class="el_source">SpettacoloServiceCommand.java</span></div><h1>SpettacoloServiceCommand.java</h1><pre class="source lang-java linenums">package com.prenotazioni.spettacolo.Services;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import com.prenotazioni.spettacolo.Entity.Posto;
+import com.prenotazioni.spettacolo.Entity.Sala;
+import com.prenotazioni.spettacolo.Entity.Spettacolo;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoPosto;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoSala;
+import com.prenotazioni.spettacolo.Exception.ExceptionNoSpettacolo;
+import com.prenotazioni.spettacolo.Repository.SpettacoloRepository;
+
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L22">public class SpettacoloServiceCommand {</span>
+    @Autowired
+    SpettacoloRepository spettacoloRepository;
+
+    @Autowired
+    KafkaTemplate&lt;String, String&gt; producer;
+
+    //serve per pubblicare i messaggi nel topic Spettacolo
+    public void publishMessage(Spettacolo spettacolo){
+<span class="fc" id="L31">        producer.send(new ProducerRecord&lt;String,String&gt;(&quot;Spettacolo&quot;, spettacolo.toString()));</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * Elimina tutto dal DB specificando il nome dello show
+     * @param spettacolo: nome dello show
+     * @return stringa che indica se tutto andato bene
+     * @throws ExceptionNoSpettacolo: se non è presente lo show
+     */
+    public String deleteEverythingByShow(String spettacolo) throws ExceptionNoSpettacolo{
+<span class="fc" id="L41">        Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacolo(spettacolo);</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if(spett.isPresent()){</span>
+<span class="fc" id="L43">            Spettacolo s = spett.get();</span>
+<span class="fc" id="L44">            spettacoloRepository.delete(s);</span>
+<span class="fc" id="L45">            return &quot;Show: &quot;+spettacolo+ &quot; deleted correctly&quot;;</span>
+        }else{
+<span class="nc" id="L47">            throw new ExceptionNoSpettacolo();</span>
+        }
+    }
+
+    /**
+     * Elimina una sala dato il numero di sala e lo show
+     * @param spettacolo: titolo dello show
+     * @param numeroSala: numero della sala da eliminare
+     * @return stringa che indica se tutto andato bene
+     * @throws ExceptionNoSpettacolo: se non c'è lo show
+     * @throws ExceptionNoSala: se non c'è la sala
+     */
+    public String deleteSalaByNumeroSalaAndShow(String spettacolo, int numeroSala) throws ExceptionNoSpettacolo, ExceptionNoSala{
+<span class="fc" id="L60">        Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacoloAndSala_NumeroSala(spettacolo, numeroSala);</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if(spett.isPresent()){</span>
+<span class="fc" id="L62">            Spettacolo s = spett.get();</span>
+<span class="fc" id="L63">            List&lt;Sala&gt; sale1 = s.getSala();</span>
+<span class="fc" id="L64">            List&lt;Sala&gt; sale = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            for(int i = 0; i &lt; sale1.size(); i++){</span>
+<span class="fc" id="L66">                Sala sala = sale1.get(i);</span>
+<span class="fc bfc" id="L67" title="All 4 branches covered.">                if((sala.getNumeroSala() == numeroSala) == false){</span>
+<span class="fc" id="L68">                    sale.add(sala);</span>
+                }
+            }
+<span class="fc" id="L71">            Spettacolo s1 = new Spettacolo(spettacolo, sale, s.getCosto(), &quot;Upset&quot;);</span>
+<span class="fc" id="L72">            spettacoloRepository.save(s1);</span>
+<span class="fc" id="L73">            return  &quot;Deleted correctly\nSala: &quot;+ numeroSala + &quot; the show: &quot; + spettacolo;</span>
+        }else{
+<span class="fc" id="L75">            spett = spettacoloRepository.findBySpettacolo(spettacolo);</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">            if(spett.isPresent()){</span>
+<span class="fc" id="L77">                throw new ExceptionNoSala();</span>
+            }else{
+<span class="fc" id="L79">                throw new ExceptionNoSpettacolo();</span>
+            }
+        }
+    }
+
+    /**
+     * Inserisco un nuovo spettacolo
+     * @param spettacolo: spettacolo da inserire
+     * @return stringa che indice se lo show è stato aggiunto o meno e il perchè
+     */
+    public String insertNewSpettacolo(Spettacolo spettacolo){
+<span class="fc" id="L90">        Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacolo(spettacolo.getSpettacolo());</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if(spett.isPresent()){</span>
+<span class="nc" id="L92">            return &quot;Show: &quot;+spettacolo.getSpettacolo()+&quot; alredy present&quot;;</span>
+        }
+<span class="fc" id="L94">        List&lt;Spettacolo&gt; listOfSpettacolo = spettacoloRepository.findAll();</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        for(Spettacolo show : listOfSpettacolo){</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">            for(Sala sala : show.getSala()){</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                for(Sala sala1 : spettacolo.getSala()){</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                    if(sala.getNumeroSala() == sala1.getNumeroSala()){</span>
+<span class="nc" id="L99">                        return &quot;Sala: &quot; + sala.getNumeroSala() + &quot; already exists&quot;;</span>
+                    }
+<span class="fc" id="L101">                }</span>
+<span class="fc" id="L102">            }</span>
+<span class="fc" id="L103">        }</span>
+<span class="fc" id="L104">        spettacoloRepository.insert(spettacolo);</span>
+<span class="fc" id="L105">        publishMessage(spettacolo);</span>
+<span class="fc" id="L106">        return &quot;New Show added correctly&quot;;</span>
+    }
+
+    /**
+     * Inserisco uno show conoscendo le sale dove verrà proiettato
+     * @param spettacolo: titolo dello show
+     * @param costo: costo del biglietto per la visione
+     * @param numeroSale: lista delle sale dove verrà proiettato
+     * @return una stringa che indica lo show e le sale aggiunte o non aggiunte
+     */
+    public String insertNewSpettacoloWithSalaAlreadyExist(String spettacolo, int costo, List&lt;Integer&gt; numeroSale){
+<span class="fc" id="L117">        Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacolo(spettacolo);</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if(spett.isPresent()){</span>
+<span class="nc" id="L119">            return &quot;Show with name: &quot; + spettacolo + &quot; already exists&quot;;</span>
+        }
+<span class="fc" id="L121">        Spettacolo sp = new Spettacolo(spettacolo, costo, &quot;Add New&quot;);</span>
+        
+<span class="fc" id="L123">        List&lt;String&gt; numeroSaleString = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        for(int i : numeroSale) {</span>
+<span class="fc" id="L125">        	String e = &quot;&quot;+ i;</span>
+<span class="fc" id="L126">        	numeroSaleString.add(e);</span>
+<span class="fc" id="L127">        }</span>
+        
+<span class="fc" id="L129">        Iterator&lt;String&gt; iter = numeroSaleString.iterator();</span>
+        
+        //vado in cerca delle altre sale su tutti gli altri show
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        while(iter.hasNext()){</span>
+<span class="fc" id="L133">        	String numeroSal = iter.next();</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">            for(Spettacolo show : spettacoloRepository.findAll()){</span>
+<span class="fc" id="L135">            	boolean flag = false;</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">                for(Sala sala : show.getSala()){</span>
+<span class="fc" id="L137">                	String numeroSal1 = sala.getNumeroSala() + &quot;&quot;;</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">                    if(numeroSal.equals(numeroSal1)){</span>
+<span class="fc" id="L139">                    	sp.addSala(sala);</span>
+<span class="fc" id="L140">                    	iter.remove();</span>
+<span class="fc" id="L141">                    	flag = true;</span>
+<span class="fc" id="L142">                    	break;</span>
+                    }
+<span class="nc" id="L144">                }</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">                if(flag) {</span>
+<span class="fc" id="L146">                	break;</span>
+                }
+<span class="nc" id="L148">            }</span>
+<span class="fc" id="L149">        }</span>
+        
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        for(Sala sala1 : sp.getSala()) {</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        	for(Posto posto : sala1.getPosto()) {</span>
+<span class="fc" id="L153">        		posto.setFree(true);</span>
+<span class="fc" id="L154">        	}</span>
+<span class="fc" id="L155">        }    </span>
+        
+<span class="fc" id="L157">        spettacoloRepository.insert(sp);</span>
+<span class="fc" id="L158">        publishMessage(sp);</span>
+        
+        //guardo le sale non presenti nel db
+<span class="fc" id="L161">        String saleNotPresent = &quot;Sale not added, beacuse not exists in DB: &quot;;</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if(numeroSaleString.size() &gt; 0) {</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        	for(String i : numeroSaleString) {</span>
+<span class="nc" id="L164">        		saleNotPresent = saleNotPresent + &quot; &quot; + i;</span>
+<span class="nc" id="L165">        	}</span>
+<span class="nc" id="L166">        	return &quot;New Show added correctly&quot; + &quot;\n&quot; + saleNotPresent;</span>
+        }
+
+<span class="fc" id="L169">        return &quot;New Show added correctly&quot;;</span>
+    }
+    
+    /**
+     * Aggiunge ad uno spettacolo una sala già esistente
+     * @param titolo: titolo dello show
+     * @param numeroSala: numero della sala
+     * @return stringa che indica lo show e se sono state aggiunte tutte le sale date o meno
+     * @throws ExceptionNoSpettacolo: se non esiste lo show
+     */
+    public String insertExistSalaBySpettacolo(String titolo, List&lt;Integer&gt; numeroSale) throws ExceptionNoSpettacolo{
+<span class="fc" id="L180">    	Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacolo(titolo);</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        if(spett.isPresent()){</span>
+<span class="fc" id="L182">            Spettacolo s = spett.get();</span>
+<span class="fc" id="L183">            String saleAlreadyPresent = &quot;Sale not added beacuse already present: &quot;;</span>
+            
+            //creo una lista di stringhe
+<span class="fc" id="L186">            List&lt;String&gt; numeroSaleString = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            for(int i : numeroSale) {</span>
+<span class="fc" id="L188">            	String e = i +&quot;&quot;;</span>
+<span class="fc" id="L189">            	numeroSaleString.add(e);</span>
+<span class="fc" id="L190">            }</span>
+            
+            //rimuovo dalla lista le sale già presenti nello show
+<span class="fc" id="L193">            Iterator&lt;String&gt; iter = numeroSaleString.iterator();</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">            while(iter.hasNext()){</span>
+<span class="fc" id="L195">            	String numeroSal = iter.next();</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                for(Sala sala : s.getSala()){</span>
+<span class="fc" id="L197">                	String numeroSal1 = sala.getNumeroSala() + &quot;&quot;;</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">                    if(numeroSal.equals(numeroSal1)){</span>
+<span class="nc" id="L199">                        saleAlreadyPresent = saleAlreadyPresent + numeroSal1 + &quot; &quot;;</span>
+<span class="nc" id="L200">                        iter.remove();</span>
+<span class="nc" id="L201">                        break;</span>
+                    }
+<span class="fc" id="L203">                }</span>
+<span class="fc" id="L204">            }</span>
+            
+            //vado in cerca delle altre sale su tutti gli altri show, setto i posti e free = true e gli aggiungo
+<span class="fc" id="L207">            iter = numeroSaleString.iterator();</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">            while(iter.hasNext()){</span>
+<span class="fc" id="L209">            	String numeroSal = iter.next();</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">                for(Spettacolo show : spettacoloRepository.findAll()){</span>
+<span class="fc" id="L211">                	boolean flag = false;</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">                    for(Sala sala : show.getSala()){</span>
+<span class="fc" id="L213">                    	String numeroSal1 = sala.getNumeroSala() + &quot;&quot;;</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">                        if(numeroSal.equals(numeroSal1)){</span>
+<span class="fc" id="L215">                        	Sala sal = new Sala(sala.getNumeroSala(), sala.getPosto());</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">                        	for(Posto post : sal.getPosto()) {</span>
+<span class="fc" id="L217">                        		post.setFree(true);</span>
+<span class="fc" id="L218">                        	}</span>
+<span class="fc" id="L219">                        	s.addSala(sal);</span>
+<span class="fc" id="L220">                        	iter.remove();</span>
+<span class="fc" id="L221">                        	flag = true;</span>
+<span class="fc" id="L222">                        	break;</span>
+                        }
+<span class="fc" id="L224">                    }</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">                    if(flag) {</span>
+<span class="fc" id="L226">                    	break;</span>
+                    }
+<span class="fc" id="L228">                }</span>
+<span class="fc" id="L229">            }</span>
+
+<span class="fc" id="L231">            spettacoloRepository.save(s);</span>
+<span class="fc" id="L232">            String saleNotAdded = &quot;Sala not added beacuse don't exist: &quot;;</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            for(int i = 0; i &lt; numeroSaleString.size(); i++){</span>
+<span class="nc" id="L234">                saleNotAdded = saleNotAdded + numeroSaleString.get(i) + &quot; &quot;;</span>
+            }
+<span class="pc bpc" id="L236" title="3 of 4 branches missed.">            if(((saleAlreadyPresent.equals(&quot;Sale not added beacuse already present: &quot;)) == false) &amp;&amp; ((saleNotAdded.equals(&quot;Sala not added beacuse don't exist: &quot;)) == false)){</span>
+<span class="nc" id="L237">            	return s.toString() + &quot;\n&quot; + saleNotAdded + &quot;\n&quot; + saleAlreadyPresent;</span>
+            }
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">            if((saleAlreadyPresent.equals(&quot;Sale not added beacuse already present: &quot;)) == false) {</span>
+<span class="nc" id="L240">            	return s.toString() + &quot;\n&quot; + saleAlreadyPresent;</span>
+            }
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">            if((saleNotAdded.equals(&quot;Sala not added beacuse don't exist: &quot;)) == false) {</span>
+<span class="nc" id="L243">            	return s.toString() + &quot;\n&quot; + saleNotAdded;</span>
+            }
+            
+<span class="fc" id="L246">            return s.toString();</span>
+        }else{
+<span class="fc" id="L248">            throw new ExceptionNoSpettacolo();</span>
+        }
+    }
+
+    /**
+     * Inserisce una nuova sala dove devi dire tutti i parametri e indicare anche lo spettacolo
+     * @param sala: indica tutte le caratteristiche della Sala
+     * @param titolo: indica il titolo dello spettacolo che avrà una sala in più
+     * @return: ritorna una stringa e dice se è andata bene o no l'aggiunta
+     * @throws ExceptionNoSpettacolo: se non esiste lo show
+     */
+    public String insertSalaBySpettacolo(String titolo, Sala sala) throws ExceptionNoSpettacolo{
+<span class="fc" id="L260">        Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacolo(titolo);</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if(spett.isPresent()){</span>
+<span class="fc" id="L262">            Spettacolo s = spett.get();</span>
+<span class="fc" id="L263">            List&lt;Sala&gt; sale = s.getSala();</span>
+            //controllo su tutte le sale per vedere se ne esiste una con lo stesso numero sala
+<span class="fc bfc" id="L265" title="All 2 branches covered.">            for(Spettacolo sp : spettacoloRepository.findAll()){</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">                for(Sala salaOld : sp.getSala()){</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">                    if(salaOld.getNumeroSala() == sala.getNumeroSala()){</span>
+<span class="nc" id="L268">                        return &quot;Sala not added, because already exist in DB sala with numeroSala: &quot; + sala.getNumeroSala();</span>
+                    }
+<span class="fc" id="L270">                }</span>
+<span class="fc" id="L271">            }</span>
+<span class="fc" id="L272">            sale.add(sala);</span>
+<span class="fc" id="L273">            s.setSala(sale);</span>
+<span class="fc" id="L274">            spettacoloRepository.save(s);</span>
+<span class="fc" id="L275">            return &quot;New Sala added correctly for the show &quot; + titolo;</span>
+        }else{
+<span class="fc" id="L277">            throw new ExceptionNoSpettacolo();</span>
+        }
+    }
+
+    /**
+     * Permette di settare il posto di una sala per uno spettacolo
+     * @param spettacolo: titolo dello show
+     * @param numeroSala: numero della sala
+     * @param posto: posto
+     * @return uno spettacolo con il posto settato correttamente
+     * @throws ExceptionNoSpettacolo: se non esiste lo show
+     * @throws ExceptionNoSala: se non esiste la sala
+     * @throws ExceptionNoPosto: se non esiste il posto
+     */
+    public Spettacolo setPostoByTitoloAnNumeroSalaAndPosto(String spettacolo, int numeroSala, Posto posto) throws ExceptionNoSpettacolo, ExceptionNoSala, ExceptionNoPosto{
+<span class="fc" id="L292">        Optional&lt;Spettacolo&gt; spett = spettacoloRepository.findBySpettacolo(spettacolo);</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        if(spett.isPresent()){</span>
+<span class="fc" id="L294">            boolean flag = false;</span>
+<span class="fc" id="L295">            Spettacolo s = spett.get();</span>
+<span class="fc" id="L296">            boolean flag2 = false;</span>
+<span class="fc" id="L297">            List&lt;Sala&gt; sale = s.getSala();</span>
+<span class="fc" id="L298">            Sala sala = new Sala();</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">            for(int i = 0; i &lt; sale.size(); i++){</span>
+<span class="fc" id="L300">                sala = sale.get(i);</span>
+<span class="fc bfc" id="L301" title="All 2 branches covered.">                if(sala.getNumeroSala() == numeroSala){</span>
+<span class="fc" id="L302">                    flag = true;</span>
+<span class="fc" id="L303">                    List&lt;Posto&gt; posti = sala.getPosto();</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">                    for(int j = 0; j &lt;posti.size(); j ++){</span>
+<span class="fc" id="L305">                        Posto posto1 = posti.get(j);</span>
+<span class="fc bfc" id="L306" title="All 4 branches covered.">                        if((posto1.getColonna()==posto.getColonna()) &amp;&amp; posto1.getRiga().equals(posto.getRiga())){</span>
+<span class="fc" id="L307">                            posto1.setFree(posto.getFree());</span>
+<span class="fc" id="L308">                            flag2 = true;</span>
+                        }
+                    }
+                }
+<span class="fc bfc" id="L312" title="All 2 branches covered.">                if(flag){</span>
+<span class="fc" id="L313">                    break;</span>
+                }
+            }
+<span class="fc bfc" id="L316" title="All 2 branches covered.">            if(flag == false){</span>
+<span class="fc" id="L317">                throw new ExceptionNoSala();</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">            }else if(flag2 == false){</span>
+<span class="fc" id="L319">                throw new ExceptionNoPosto();</span>
+            }else{
+<span class="fc" id="L321">                spettacoloRepository.save(s);</span>
+<span class="fc" id="L322">                return s;</span>
+            }
+        }else{
+<span class="fc" id="L325">            throw new ExceptionNoSpettacolo();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
