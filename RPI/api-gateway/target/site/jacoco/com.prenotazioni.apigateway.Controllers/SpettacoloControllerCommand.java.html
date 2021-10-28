@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpettacoloControllerCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.apigateway.Controllers</a> &gt; <span class="el_source">SpettacoloControllerCommand.java</span></div><h1>SpettacoloControllerCommand.java</h1><pre class="source lang-java linenums">package com.prenotazioni.apigateway.Controllers;
+
+import java.net.URISyntaxException;
+import java.util.List;
+
+import com.prenotazioni.apigateway.Entity.Posto;
+import com.prenotazioni.apigateway.Entity.Sala;
+import com.prenotazioni.apigateway.Entity.Spettacolo;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceCommand;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L22">public class SpettacoloControllerCommand {</span>
+
+    @Autowired
+    ApiGatewayServiceQuery apiGatewayServiceQuery;
+
+    @Autowired
+    ApiGatewayServiceCommand apiGatewayServiceCommand;
+
+    /**
+     * Delete a determinate show
+     * @param show: title of show
+     * @return a string where I say if everything is fine
+     */
+    @DeleteMapping(&quot;/Teatro/deleteShow&quot;)
+    public String deleteByShow(@RequestParam(value = &quot;show&quot;) String show){
+        try{
+<span class="fc" id="L38">            return apiGatewayServiceCommand.deleteByShow(show);</span>
+<span class="nc" id="L39">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L40">            return &quot;Uri sintax error&quot;;</span>
+        }
+    }
+
+    /**
+     * Insert a new Show
+     * @param spettacolo: all features of the new show
+     * @return a string where I say if everything is fine
+     */
+    @PutMapping(&quot;/Teatro/addNewShowAndNewSale&quot;)
+    public String insertNewShowAndNewSala(@RequestBody Spettacolo spettacolo){
+        try{
+<span class="fc" id="L52">            return apiGatewayServiceCommand.inserNewShowAndNewSala(spettacolo);</span>
+<span class="nc" id="L53">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L54">            return &quot;Uri sintax error&quot;;</span>
+        }
+    }
+
+    /**
+     * Insert new Show knowing numeroSale
+     * @param show: title of show
+     * @param cost: cost of show
+     * @param listNumeroSale: list of number of sale for the show
+     * @return a string where I say if everything is fine
+     */
+    @PutMapping(&quot;/Teatro/addNewShowAndKnowListOfNumeroSale&quot;)
+    public String insertNewShowKnowSala(@RequestParam(value = &quot;show&quot;) String show, @RequestParam(value = &quot;cost&quot;) int cost, 
+            @RequestParam(value = &quot;listNumeroSale&quot;) List&lt;Integer&gt; listNumeroSale){
+        try{
+<span class="fc" id="L69">            return apiGatewayServiceCommand.inserNewShowAndKnowSala(show, cost, listNumeroSale);</span>
+<span class="nc" id="L70">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L71">            return &quot;Uri sintax error&quot;;</span>
+        }
+    }
+
+    /**
+     * Delete a deterinate sala for the show
+     * @param show: name of show
+     * @param numeroSala: number of sala
+     * @return a string where I say if everything is fine
+     */
+    @DeleteMapping(&quot;/Teatro/{show}/deleteSala&quot;)
+    public String deleteSalaByShowAndNumeroSala(@PathVariable(&quot;show&quot;)String show, @RequestParam(value = &quot;numeroSala&quot;)int numeroSala){
+        try{
+<span class="fc" id="L84">            return apiGatewayServiceCommand.deleteSalaByShowAndNumeroSala(show, numeroSala);</span>
+<span class="nc" id="L85">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L86">            return &quot;Uri sintax error&quot;;</span>
+        }
+    }
+
+    /**
+     * Add a new Sala for that show
+     * @param show: title of show
+     * @param sala: new sala to add
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/Teatro/{show}/addNewSala&quot;)
+    public String addNewSalaByShow(@PathVariable(&quot;show&quot;) String show, @RequestBody Sala sala){
+        try{
+<span class="fc" id="L99">            return apiGatewayServiceCommand.addNewSalaByShow(show, sala);</span>
+<span class="nc" id="L100">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L101">            return &quot;Uri sintax error&quot;;</span>
+        }
+    }
+
+    /**
+     * Add a exists Sala for that show
+     * @param show: title of show
+     * @param sala: list of sala already exists to add
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/Teatro/{show}/addExistsSala&quot;)
+    public String addExistsSalaByShow(@PathVariable(&quot;show&quot;) String show, @RequestParam(value = &quot;ListNumeroSale&quot;) List&lt;Integer&gt; numeroSale){
+        try{
+<span class="fc" id="L114">            return apiGatewayServiceCommand.addExistsSalaByShow(show, numeroSale);</span>
+<span class="nc" id="L115">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L116">            return &quot;Uri sintax error&quot;;</span>
+        }
+    }
+
+    /**
+     * Set Posto
+     * @param show: title of show
+     * @param numeroSala: number of sala
+     * @param free: state of posto
+     * @param riga: line of posto
+     * @param colonna: column of posto
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/Teatro/{show}/{numeroSala}/setPosto&quot;)
+    public String setPosto(@PathVariable(&quot;show&quot;)String show, @PathVariable(&quot;numeroSala&quot;)int numeroSala, @RequestParam(value = &quot;free&quot;)boolean free, 
+            @RequestParam(value = &quot;riga&quot;) String riga, @RequestParam(value = &quot;colonna&quot;) int colonna){
+        try{
+<span class="fc" id="L133">            Posto posto = new Posto(riga, colonna, free);</span>
+<span class="fc" id="L134">            return apiGatewayServiceCommand.setPosto(show, numeroSala, posto);</span>
+<span class="nc" id="L135">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L136">            return &quot;Sintax error&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

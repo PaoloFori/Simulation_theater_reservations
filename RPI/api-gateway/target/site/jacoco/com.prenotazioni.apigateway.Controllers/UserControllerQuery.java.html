@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserControllerQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.apigateway.Controllers</a> &gt; <span class="el_source">UserControllerQuery.java</span></div><h1>UserControllerQuery.java</h1><pre class="source lang-java linenums">package com.prenotazioni.apigateway.Controllers;
+
+import java.util.List;
+
+import com.prenotazioni.apigateway.Exception.ExceptionNoUser;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceCommand;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L15">public class UserControllerQuery {</span>
+
+    @Autowired
+    ApiGatewayServiceQuery apiGatewayServiceQuery;
+
+    @Autowired
+    ApiGatewayServiceCommand apiGatewayServiceCommand;
+
+    /**
+     * Get all users from DB
+     * @return List of string with all user
+     */
+    @GetMapping(value = &quot;/Users&quot;)
+    public List&lt;String&gt; getAllUser(){
+<span class="fc" id="L29">        return apiGatewayServiceQuery.getAllUser();</span>
+    }
+
+    /**
+     * Get a list of determinate users by name or surname or both
+     * @param name: user's name
+     * @param surname: user's surname
+     * @return a list of users
+     */
+    @GetMapping(value = &quot;/getUser&quot;)
+    public List&lt;String&gt; getUserByNameOrSurname(@RequestParam(value = &quot;name&quot;, defaultValue = &quot;&quot;)String name, @RequestParam(value = &quot;surname&quot;, defaultValue = &quot;&quot;)String surname){
+<span class="fc" id="L40">        return apiGatewayServiceQuery.getUserByNameOrSurnameOrBoth(name, surname);</span>
+    } 
+    
+    /**
+     * Get a determinate User by id
+     * @param id: user's id
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/getUserById&quot;)
+    public String getUserById(@RequestParam(value = &quot;id&quot;)int id){
+        try{
+<span class="fc" id="L51">            return apiGatewayServiceQuery.getUserById(id);</span>
+<span class="fc" id="L52">        }catch(ExceptionNoUser e){</span>
+<span class="fc" id="L53">            return &quot;No user with id: &quot; + id;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

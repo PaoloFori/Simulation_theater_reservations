@@ -1,0 +1,7 @@
+com\prenotazioni\apigateway\TestExceptionUser.class
+com\prenotazioni\apigateway\TestControllerSpettacoloQuery.class
+com\prenotazioni\apigateway\TestControllerSpettacoloCommand.class
+com\prenotazioni\apigateway\TestControllerUserCommand.class
+com\prenotazioni\apigateway\TestExceptionSpettacolo.class
+com\prenotazioni\apigateway\ApiGatewayApplicationTests.class
+com\prenotazioni\apigateway\TestControllerUserQuery.class

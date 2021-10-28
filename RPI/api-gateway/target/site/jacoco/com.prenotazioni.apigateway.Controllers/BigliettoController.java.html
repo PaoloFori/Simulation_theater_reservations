@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BigliettoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.apigateway.Controllers</a> &gt; <span class="el_source">BigliettoController.java</span></div><h1>BigliettoController.java</h1><pre class="source lang-java linenums">package com.prenotazioni.apigateway.Controllers;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import com.prenotazioni.apigateway.Entity.Posto;
+import com.prenotazioni.apigateway.Exception.ExceptionNoEnoughMoney;
+import com.prenotazioni.apigateway.Exception.ExceptionNoFreePosto;
+import com.prenotazioni.apigateway.Exception.ExceptionNoPosto;
+import com.prenotazioni.apigateway.Exception.ExceptionNoSala;
+import com.prenotazioni.apigateway.Exception.ExceptionNoSpettacolo;
+import com.prenotazioni.apigateway.Exception.ExceptionNoUser;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceCommand;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L29">public class BigliettoController {</span>
+
+    @Autowired
+    ApiGatewayServiceQuery apiGatewayServiceQuery;
+
+    @Autowired
+    ApiGatewayServiceCommand apiGatewayServiceCommand;
+
+<span class="fc" id="L37">    ByteArrayOutputStream inputStream = null;</span>
+
+    /**
+     * return last pdf created
+     * @return last pdf created
+     */
+    @GetMapping(&quot;/Teatro/getLastTicket&quot;)
+    public ResponseEntity&lt;InputStreamResource&gt; getLastTicket(){
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if(inputStream == null){</span>
+<span class="nc" id="L46">            return null;</span>
+        }
+<span class="nc" id="L48">        ByteArrayInputStream input = new ByteArrayInputStream(inputStream.toByteArray());</span>
+<span class="nc" id="L49">        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(new InputStreamResource(input));</span>
+    }
+
+    /**
+     * Book a posto
+     * @param show: title of show
+     * @param numeroSala: number of sala
+     * @param idUser: user's id
+     * @param riga: line of posto
+     * @param colonna: column of posto
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/Teatro/{show}/{numeroSala}/prenota&quot;)
+    public String prenotaPostoAndCreateTicket(@PathVariable(&quot;show&quot;)String show, @PathVariable(&quot;numeroSala&quot;)int numeroSala, @RequestParam(value = &quot;idUser&quot;)int idUser, 
+            @RequestParam(value = &quot;riga&quot;) String riga, @RequestParam(value = &quot;colonna&quot;) int colonna){
+        try{
+<span class="fc" id="L65">            Posto posto = new Posto(riga, colonna, false);</span>
+<span class="nc" id="L66">            inputStream = apiGatewayServiceQuery.getTicketAndSee(idUser, show, numeroSala, posto);</span>
+<span class="nc" id="L67">            return &quot;Ticket ready, use the method getLastTicket to see&quot;;</span>
+<span class="nc" id="L68">        }catch(URISyntaxException e){</span>
+<span class="nc" id="L69">            return &quot;Uri Sintax Exception&quot;;</span>
+<span class="nc" id="L70">        }catch(IOException e1){</span>
+<span class="nc" id="L71">            return &quot;IOException&quot;;</span>
+<span class="nc" id="L72">        }catch(ExceptionNoUser e2){</span>
+<span class="nc" id="L73">            return &quot;No User with id: &quot; + idUser;</span>
+<span class="fc" id="L74">        }catch(ExceptionNoSpettacolo e3){</span>
+<span class="fc" id="L75">            return &quot;No show with name: &quot; + show;</span>
+<span class="fc" id="L76">        }catch(ExceptionNoSala e4){</span>
+<span class="fc" id="L77">            return &quot;No sala: &quot; + numeroSala + &quot; for show: &quot; + show;</span>
+<span class="fc" id="L78">        }catch(ExceptionNoEnoughMoney e5){</span>
+<span class="fc" id="L79">            return &quot;User &quot; + idUser + &quot; haven't got enough money&quot;;</span>
+<span class="fc" id="L80">        }catch(ExceptionNoPosto e6){</span>
+<span class="fc" id="L81">            return &quot;Not existx posto: &quot; + colonna + riga.toUpperCase() + &quot; for sala: &quot; + numeroSala;</span>
+<span class="fc" id="L82">        }catch(ExceptionNoFreePosto e7){</span>
+<span class="fc" id="L83">            return &quot;Posto: &quot; + colonna + riga.toUpperCase() + &quot; already busy&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

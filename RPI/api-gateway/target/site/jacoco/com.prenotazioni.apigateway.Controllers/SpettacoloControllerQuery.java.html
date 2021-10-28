@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpettacoloControllerQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.apigateway.Controllers</a> &gt; <span class="el_source">SpettacoloControllerQuery.java</span></div><h1>SpettacoloControllerQuery.java</h1><pre class="source lang-java linenums">package com.prenotazioni.apigateway.Controllers;
+
+import java.util.List;
+
+import com.prenotazioni.apigateway.Exception.ExceptionNoSala;
+import com.prenotazioni.apigateway.Exception.ExceptionNoSpettacolo;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceCommand;
+import com.prenotazioni.apigateway.Services.ApiGatewayServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L17">public class SpettacoloControllerQuery {</span>
+
+    @Autowired
+    ApiGatewayServiceQuery apiGatewayServiceQuery;
+
+    @Autowired
+    ApiGatewayServiceCommand apiGatewayServiceCommand;
+
+    /**
+     * Get all Show on DB
+     * @return list of string with all show
+     */
+    @GetMapping(value = &quot;/getAllShow&quot;)
+    public List&lt;String&gt; getAllShow(){
+<span class="fc" id="L31">        return apiGatewayServiceQuery.getAllShows();</span>
+    }
+
+    /**
+     * Get all shows by name or get a determinate show by name and numeroSala
+     * @param show: title of show
+     * @param numeroSala: number of sala
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value=&quot;/Teatro/{show}&quot;)
+    public String getShow(@PathVariable(&quot;show&quot;)String show, @RequestParam(value = &quot;numeroSala&quot;, defaultValue = &quot;-1&quot;)int numeroSala){
+        try{
+<span class="fc" id="L43">            return apiGatewayServiceQuery.getShowByParam(show, numeroSala); </span>
+<span class="fc" id="L44">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L45">            return &quot;No show with name: &quot; + show;</span>
+<span class="fc" id="L46">        }catch(ExceptionNoSala e1){</span>
+<span class="fc" id="L47">            return &quot;No sala: &quot; + numeroSala + &quot; for show: &quot; + show;</span>
+        }
+    }
+
+    /**
+     * Get cost for show
+     * @param show: title of show
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}/cost&quot;)
+    public String getCostByShow(@PathVariable(&quot;show&quot;)String show){
+<span class="fc" id="L58">        return apiGatewayServiceQuery.getCostoBySpettacolo(show);</span>
+    }
+
+    /**
+     * Get all free posto by show or for show and numeroSala
+     * @param show: title of show
+     * @param numeroSala: number of sala
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(value = &quot;/Teatro/{show}/FreePosti&quot;)
+    public String getAllFreePostoByShowOrShowAndNumeroSala(@PathVariable(&quot;show&quot;) String show, @RequestParam(value = &quot;numeroSala&quot;, defaultValue = &quot;-1&quot;)int numeroSala){
+        try{
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if(numeroSala&gt;=0){</span>
+<span class="fc" id="L71">               return apiGatewayServiceQuery.getAllFreePostoByNumeroSalaAndShow(show, numeroSala);</span>
+            }else{
+<span class="fc" id="L73">                return apiGatewayServiceQuery.getAllFreePostoPerAllSalaByShow(show);</span>
+            }
+<span class="fc" id="L75">        }catch(ExceptionNoSpettacolo e){</span>
+<span class="fc" id="L76">            return &quot;No show with name: &quot; + show;</span>
+<span class="fc" id="L77">        }catch(ExceptionNoSala e1){</span>
+<span class="fc" id="L78">            return &quot;No sala: &quot; + numeroSala + &quot; for show: &quot; + show;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

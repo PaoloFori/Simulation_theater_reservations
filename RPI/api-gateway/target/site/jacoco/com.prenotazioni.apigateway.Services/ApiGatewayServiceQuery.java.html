@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiGatewayServiceQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.apigateway.Services</a> &gt; <span class="el_source">ApiGatewayServiceQuery.java</span></div><h1>ApiGatewayServiceQuery.java</h1><pre class="source lang-java linenums">package com.prenotazioni.apigateway.Services;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.prenotazioni.apigateway.Entity.Posto;
+import com.prenotazioni.apigateway.Entity.Sala;
+import com.prenotazioni.apigateway.Entity.Spettacolo;
+import com.prenotazioni.apigateway.Entity.User;
+import com.prenotazioni.apigateway.Exception.ExceptionNoEnoughMoney;
+import com.prenotazioni.apigateway.Exception.ExceptionNoFreePosto;
+import com.prenotazioni.apigateway.Exception.ExceptionNoPosto;
+import com.prenotazioni.apigateway.Exception.ExceptionNoSala;
+import com.prenotazioni.apigateway.Exception.ExceptionNoSpettacolo;
+import com.prenotazioni.apigateway.Exception.ExceptionNoUser;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+<span class="fc" id="L32">public class ApiGatewayServiceQuery {</span>
+    
+    @Autowired
+    RestTemplate restTemplate;
+
+    /**
+     * Ritorna tutti gli show nel db
+     * @return lista di stringhe con tutti gli show
+     */
+    public List&lt;String&gt; getAllShows(){
+<span class="fc" id="L42">        List&lt;Spettacolo&gt; shows =  Arrays.asList(restTemplate.getForObject(&quot;http://localhost:8085/Teatro/shows&quot;, Spettacolo[].class));</span>
+<span class="fc" id="L43">        List&lt;String&gt; listOfString = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        for(Spettacolo show : shows){</span>
+<span class="fc" id="L45">            listOfString.add(show.toString());</span>
+<span class="fc" id="L46">        }</span>
+<span class="fc" id="L47">        return listOfString;</span>
+    }
+
+    /**
+     * Ritorna il costo delle spettacolo
+     * @param spettacolo: titolo dello show
+     * @return una stringa che indica se tutto andato bene o no
+     */
+    public String getCostoBySpettacolo(String spettacolo){
+<span class="fc" id="L56">        String uri = &quot;http://localhost:8085/Teatro/show?show=&quot; + spettacolo;</span>
+<span class="fc" id="L57">        return restTemplate.getForObject(uri, String.class);</span>
+    }
+
+    /**
+     * Ritorna lo spettacolo dato il titolo, li ritorna tutti o qulli di una determinaata stanza
+     * @param titolo: titolo dello shoe
+     * @param numeroSala: numero della sala
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws ExceptionNoSpettacolo: se non esiste lo show
+     * @throws ExceptionNoSala: se non esiste la sala
+     */
+    public String getShowByParam(String titolo, int numeroSala) throws ExceptionNoSpettacolo, ExceptionNoSala{
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if(numeroSala == -1){</span>
+<span class="fc" id="L70">            Spettacolo spettacolo = restTemplate.getForObject(&quot;http://localhost:8085/Teatro/&quot;+titolo, Spettacolo.class);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if(spettacolo == null){</span>
+<span class="nc" id="L72">                throw new ExceptionNoSpettacolo();</span>
+            }
+<span class="fc" id="L74">            return spettacolo.toString();</span>
+        }else{
+<span class="fc" id="L76">            Spettacolo show = restTemplate.getForObject(&quot;http://localhost:8085/Teatro/&quot;+titolo+&quot;/&quot;+numeroSala, Spettacolo.class);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            if(show == null){</span>
+<span class="fc" id="L78">                Spettacolo spettacolo = restTemplate.getForObject(&quot;http://localhost:8085/Teatro/&quot;+titolo, Spettacolo.class);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">                if(spettacolo == null){</span>
+<span class="fc" id="L80">                    throw new ExceptionNoSpettacolo();</span>
+                }else{
+<span class="fc" id="L82">                    throw new ExceptionNoSala();</span>
+                }
+            }
+<span class="fc" id="L85">            return show.toString();</span>
+        }
+    }
+
+    /**
+     * Ritorna tutti i posti liberi di uno spettacolo di qualsiasi sala
+     * @param spettacolo: titolo dello show
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws ExceptionNoSpettacolo: se non esiste lo show
+     */
+    public String getAllFreePostoPerAllSalaByShow(String spettacolo) throws ExceptionNoSpettacolo{
+<span class="fc" id="L96">        Spettacolo show = restTemplate.getForObject(&quot;http://localhost:8085/Teatro/&quot;+spettacolo+&quot;/freePosti&quot;, Spettacolo.class);</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if(show == null){</span>
+<span class="nc" id="L98">            throw new ExceptionNoSpettacolo();</span>
+        }
+<span class="fc" id="L100">        return show.toString();</span>
+    }
+
+    /**
+     * Ritorna i posti liberi di uno spettacolo dati il nome dello show e il numero della sala
+     * @param show: titolo dello show
+     * @param numeroSala: numero della sala
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws ExceptionNoSpettacolo: se non esiste lo show
+     * @throws ExceptionNoSala: se non esiste la sala
+     */
+    public String getAllFreePostoByNumeroSalaAndShow(String show, int numeroSala) throws ExceptionNoSpettacolo, ExceptionNoSala{
+<span class="fc" id="L112">        Spettacolo spettacolo = restTemplate.getForObject(&quot;http://localhost:8085/Teatro/&quot;+show+&quot;/&quot;+numeroSala+&quot;/freePosti&quot;, Spettacolo.class);</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if(spettacolo == null){</span>
+<span class="fc" id="L114">            Spettacolo show1 = restTemplate.getForObject(&quot;http://localhost:8085/Teatro/&quot;+show+&quot;/freePosti&quot;, Spettacolo.class);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            if(show1 == null){</span>
+<span class="fc" id="L116">                throw new ExceptionNoSpettacolo();</span>
+            }else{
+<span class="fc" id="L118">                throw new ExceptionNoSala();</span>
+            }
+        }
+<span class="fc" id="L121">        return spettacolo.toString();</span>
+    }
+
+    /**
+     * Ritorna lista con tutti gli utenti
+     * @return lista di stringhe con tutti gli utenti
+     */
+    public List&lt;String&gt; getAllUser(){
+<span class="fc" id="L129">        String uri = &quot;http://localhost:8081/users&quot;;</span>
+<span class="fc" id="L130">        List&lt;User&gt; users = Arrays.asList(restTemplate.getForObject(uri, User[].class));</span>
+<span class="fc" id="L131">        List&lt;String&gt; listOfString = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        for(User user : users){</span>
+<span class="fc" id="L133">            listOfString.add(user.toString());</span>
+<span class="fc" id="L134">        }</span>
+<span class="fc" id="L135">        return listOfString;</span>
+    }
+
+    /**
+     * ritorna un utente specifico dato l'id
+     * @param id: id dell'utente
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws ExceptionNoUser: se non esiste l'utente
+     */
+    public String getUserById(int id) throws ExceptionNoUser{
+<span class="fc" id="L145">        String uri = &quot;http://localhost:8081/userId?id=&quot; + id;</span>
+<span class="fc" id="L146">        User user = restTemplate.getForObject(uri, User.class);</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if(user == null){</span>
+<span class="fc" id="L148">            throw new ExceptionNoUser();</span>
+        }
+<span class="fc" id="L150">        return user.toString();</span>
+    }
+
+    /**
+     * Ritonra una lista di tutti gli utenti trovati per quel nome o cognome o entrambi
+     * @param name: nome dell'utente
+     * @param surname: cognome dell'utene
+     * @return lista di stringhe con gli utenti con stesso nome o stesso cognome o si astesso nome sia stesso cognome
+     */
+    public List&lt;String&gt; getUserByNameOrSurnameOrBoth(String name, String surname){
+<span class="fc" id="L160">        List&lt;User&gt; users = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L161" title="1 of 4 branches missed.">        if(name.equals(&quot;&quot;) &amp;&amp; !surname.equals(&quot;&quot;)){</span>
+<span class="fc" id="L162">            String uri = &quot;http://localhost:8081/userSurname?surname=&quot; + surname;</span>
+<span class="fc" id="L163">            users = Arrays.asList(restTemplate.getForObject(uri, User[].class));</span>
+<span class="pc bpc" id="L164" title="2 of 4 branches missed.">        }else if(surname.equals(&quot;&quot;) &amp;&amp; !name.equals(&quot;&quot;)){</span>
+<span class="fc" id="L165">            String uri = &quot;http://localhost:8081/userName?name=&quot; + name;</span>
+<span class="fc" id="L166">            users = Arrays.asList(restTemplate.getForObject(uri, User[].class));</span>
+<span class="pc bnc" id="L167" title="All 4 branches missed.">        }else if(name.equals(&quot;&quot;) &amp;&amp; surname.equals(&quot;&quot;)){</span>
+<span class="nc" id="L168">            return Arrays.asList(&quot;Put name or surname or both&quot;);</span>
+<span class="nc bnc" id="L169" title="All 4 branches missed.">        }else if(!name.equals(&quot;&quot;) &amp;&amp; !surname.equals(&quot;&quot;)){</span>
+<span class="nc" id="L170">            String uriName = &quot;http://localhost:8081/userName?name=&quot; + name;</span>
+<span class="nc" id="L171">            List&lt;User&gt; usersName =  Arrays.asList(restTemplate.getForObject(uriName, User[].class));</span>
+<span class="nc" id="L172">            String uriSurname = &quot;http://localhost:8081/userSurname?surname=&quot; + surname;</span>
+<span class="nc" id="L173">            List&lt;User&gt; usersSurname = Arrays.asList(restTemplate.getForObject(uriSurname, User[].class));</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            for(User userName : usersName){</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                for(User userSurname : usersSurname){</span>
+<span class="nc bnc" id="L176" title="All 4 branches missed.">                    if(userName.getName().equals(userSurname.getName()) &amp;&amp; userName.getSurname().equals(userSurname.getSurname())){</span>
+<span class="nc" id="L177">                        users.add(userName);</span>
+                    }
+<span class="nc" id="L179">                }</span>
+<span class="nc" id="L180">            }</span>
+        }
+<span class="fc" id="L182">        List&lt;String&gt; listOfString = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        for(User user : users){</span>
+<span class="fc" id="L184">            listOfString.add(user.toString());</span>
+<span class="fc" id="L185">        }</span>
+<span class="fc" id="L186">        return listOfString;</span>
+
+    }
+
+    /**
+     * Crea il flusso di dati per il biglietto
+     * @param idUser: id dell'utente
+     * @param nameSpettacolo: titolo dello spettacolo
+     * @param numeroSala: numero di sala 
+     * @param posto: posto a sedere
+     * @return flusso di dati per la creazione del pdf
+     * @throws URISyntaxException
+     * @throws IOException
+     * @throws ExceptionNoUser: se non esiste l'utente
+     * @throws ExceptionNoSpettacolo: se non esiste lo spettacolo
+     * @throws ExceptionNoPosto: se no esiste il posto
+     * @throws ExceptionNoFreePosto: se il posto è già occupato
+     * @throws ExceptionNoEnoughMoney: se non ci sono abbastanza soldi
+     * @throws ExceptionNoSala: se non esiste la sala
+     */
+    public ByteArrayOutputStream getTicketAndSee(int idUser, String nameSpettacolo, int numeroSala, Posto posto)throws URISyntaxException, IOException, ExceptionNoUser,
+            ExceptionNoSpettacolo, ExceptionNoPosto, ExceptionNoEnoughMoney, ExceptionNoSala, ExceptionNoFreePosto{
+        
+        //recuperare l'user dall'id
+<span class="fc" id="L210">        String uri1 = &quot;http://localhost:8081/userId?id=&quot;+idUser;</span>
+<span class="fc" id="L211">        User user = restTemplate.getForObject(uri1, User.class);</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">        if(user == null){</span>
+<span class="nc" id="L213">            throw new ExceptionNoUser();</span>
+        }
+
+        //recupero lo spettacolo
+<span class="fc" id="L217">        String uri2 = &quot;http://localhost:8085/Teatro/&quot;+nameSpettacolo+&quot;/&quot;+numeroSala;</span>
+<span class="fc" id="L218">        Spettacolo spettacolo = restTemplate.getForObject(uri2, Spettacolo.class);</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if(spettacolo == null){</span>
+<span class="fc" id="L220">            String tmpUri2 = &quot;http://localhost:8085/Teatro/&quot;+nameSpettacolo;</span>
+<span class="fc" id="L221">            Spettacolo tmpSpettacolo = restTemplate.getForObject(tmpUri2, Spettacolo.class);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">            if(tmpSpettacolo == null){</span>
+<span class="fc" id="L223">                throw new ExceptionNoSpettacolo();</span>
+            }
+<span class="fc" id="L225">            throw new ExceptionNoSala();</span>
+        }
+
+        //controllo se ha sufficienti soldi
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        if(user.getCash() &lt; spettacolo.getCosto()){</span>
+<span class="fc" id="L230">            throw new ExceptionNoEnoughMoney();</span>
+        }
+        
+        //controllo se il posto che vuole è con free == true
+<span class="fc" id="L234">        List&lt;Sala&gt; sale = spettacolo.getSala();</span>
+        List&lt;Posto&gt; posti;
+<span class="fc" id="L236">        boolean flag = true;</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        for(int i = 0; i &lt; sale.size(); i++){</span>
+<span class="fc" id="L238">            Sala sala = sale.get(i);</span>
+<span class="fc" id="L239">            posti = sala.getPosto();</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            for(int j = 0; j &lt; posti.size(); j++){</span>
+<span class="fc" id="L241">                Posto posto1 = posti.get(j);</span>
+<span class="fc bfc" id="L242" title="All 4 branches covered.">                if((posto1.getColonna() == posto.getColonna()) &amp; (posto1.getRiga().equals(posto.getRiga()))){</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">                    if(posto1.getFree() == false){</span>
+<span class="fc" id="L244">                        throw new ExceptionNoFreePosto();</span>
+                    }
+<span class="nc" id="L246">                    flag = false;</span>
+<span class="nc" id="L247">                    break;</span>
+                }
+            }
+        }
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">        if(flag){</span>
+<span class="fc" id="L252">            throw new ExceptionNoPosto();</span>
+        }
+
+        //Il posto è libero, lo assegno occupato
+<span class="nc" id="L256">        String uri3 = &quot;http://localhost:8085/Teatro/&quot;+nameSpettacolo+&quot;/&quot;+numeroSala+&quot;/upsetPosto?colonna=&quot;+posto.getColonna()+&quot;&amp;free=&quot;+posto.getFree()+&quot;&amp;riga=&quot;+posto.getRiga();</span>
+<span class="nc" id="L257">        RequestEntity&lt;String&gt; request1 = RequestEntity.post(new URI(uri3)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="nc" id="L258">        ResponseEntity&lt;String&gt; response1 = restTemplate.exchange(request1, String.class);</span>
+
+        //sottraggo i soldi del costo del biglietto
+<span class="nc" id="L261">        String uri4 = &quot;http://localhost:8081/&quot;+idUser+&quot;/removeMoney?money=&quot; + spettacolo.getCosto();</span>
+<span class="nc" id="L262">        RequestEntity&lt;String&gt; request2 = RequestEntity.post(new URI(uri4)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="nc" id="L263">        ResponseEntity&lt;String&gt; response2 = restTemplate.exchange(request2, String.class);</span>
+<span class="nc" id="L264">        String string = &quot;&quot;;</span>
+<span class="nc" id="L265">        string = string+ response1.getBody()+response2.getBody();</span>
+
+        //creo il biglietto
+<span class="nc" id="L268">        String uri5 = &quot;http://localhost:8082/Teatro/&quot;+nameSpettacolo+&quot;/biglietto?Posto=&quot;+posto.toStringOnlyPosto()+&quot;&amp;cost=&quot;+spettacolo.getCosto()+&quot;&amp;name=&quot;+user.getName()+&quot;&amp;surname=&quot;+user.getSurname()+ &quot;&amp;numeroSala=&quot; + numeroSala;   </span>
+<span class="nc" id="L269">        ResponseEntity&lt;Resource&gt; response3 = restTemplate.exchange(RequestEntity.get(new URI(uri5)).accept(MediaType.APPLICATION_JSON).build(), Resource.class);</span>
+<span class="nc" id="L270">        InputStream inputStream = response3.getBody().getInputStream();</span>
+
+        //converto L'inputStream  in ByteArrayOutputStream
+<span class="nc" id="L273">        int bytesRead = 0;</span>
+<span class="nc" id="L274">        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();</span>
+<span class="nc" id="L275">        byte[] buffer = new byte[8000];</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        while((bytesRead = inputStream.read(buffer)) != -1) {</span>
+<span class="nc" id="L277">            outputByteArray.write(buffer, 0, bytesRead);</span>
+        }
+
+<span class="nc" id="L280">        return outputByteArray; </span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

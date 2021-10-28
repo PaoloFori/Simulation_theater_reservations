@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApiGatewayServiceCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.apigateway.Services</a> &gt; <span class="el_source">ApiGatewayServiceCommand.java</span></div><h1>ApiGatewayServiceCommand.java</h1><pre class="source lang-java linenums">package com.prenotazioni.apigateway.Services;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+
+import com.prenotazioni.apigateway.Entity.Posto;
+import com.prenotazioni.apigateway.Entity.Sala;
+import com.prenotazioni.apigateway.Entity.Spettacolo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+<span class="fc" id="L20">public class ApiGatewayServiceCommand {</span>
+
+    @Autowired
+    RestTemplate restTemplate;
+
+    /**
+     * Aggiunge una sala dati i vari di dati di quest'ultima e il titolo dello spettacolo
+     * @param show: titolo dello spettacolo
+     * @param sala: nuova sala da dover aggiungere
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String addNewSalaByShow(String show, Sala sala) throws URISyntaxException{
+<span class="fc" id="L33">        String uri = &quot;http://localhost:8085/Teatro/&quot;+show+&quot;/addNewSala&quot;;</span>
+<span class="fc" id="L34">        RequestEntity&lt;Sala&gt; request = RequestEntity.post(new URI(uri)).accept(MediaType.APPLICATION_JSON).body(sala);</span>
+<span class="fc" id="L35">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L36">        return response.getBody();</span>
+    }
+
+    /**
+     * Aggiunge sale esistenti ad un determinato show
+     * @param show: titolo dello spettacolo
+     * @param numeroSale: lista dei numeri delle sale da aggiungere
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String addExistsSalaByShow(String show, List&lt;Integer&gt; numeroSale) throws URISyntaxException{
+<span class="fc" id="L47">        String uri = &quot;http://localhost:8085/Teatro/&quot;+show+&quot;/addExistSala?listaNumeroSale=&quot; + numeroSale.get(0);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        for(int i = 1; i &lt; numeroSale.size(); i++){</span>
+<span class="nc" id="L49">            uri = uri + &quot;&amp;listaNumeroSale=&quot; + numeroSale.get(i);</span>
+        }
+<span class="fc" id="L51">        RequestEntity&lt;Sala&gt; request = RequestEntity.post(new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L52">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L53">        return response.getBody();</span>
+    }
+
+    /**
+     * Elimina un film dato il nome dello show
+     * @param show: titolo dello show
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String deleteByShow(String show) throws URISyntaxException{
+<span class="fc" id="L63">        String uri = &quot;http://localhost:8085/Teatro/deleteShow?show=&quot;+show;</span>
+<span class="fc" id="L64">        RequestEntity&lt;String&gt; request = RequestEntity.method(HttpMethod.DELETE, new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L65">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L66">        return response.getBody();</span>
+    }
+
+    /**
+     * Elimina la sala di uno show
+     * @param show: titolo dello show
+     * @param numeroSala: numero della sala da eliminare
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String deleteSalaByShowAndNumeroSala(String show, int numeroSala)throws URISyntaxException{
+<span class="fc" id="L77">        String uri = &quot;http://localhost:8085/Teatro/&quot;+show+&quot;/deleteSala?numeroSala=&quot;+numeroSala;</span>
+<span class="fc" id="L78">        RequestEntity&lt;String&gt; request = RequestEntity.method(HttpMethod.DELETE, new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L79">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L80">        return response.getBody();</span>
+    }
+
+    /**
+     * Inserisce un nuovo show con anche la prima sala
+     * @param spettacolo: spettacolo da aggiungere
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String inserNewShowAndNewSala(Spettacolo spettacolo) throws URISyntaxException{
+<span class="fc" id="L90">        String uri = &quot;http://localhost:8085/Teatro/addNewShowAndNewSala&quot;;</span>
+<span class="fc" id="L91">        RequestEntity&lt;Spettacolo&gt; request = RequestEntity.method(HttpMethod.PUT, new URI(uri)).accept(MediaType.APPLICATION_JSON).body(spettacolo);</span>
+<span class="fc" id="L92">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L93">        return response.getBody();</span>
+    }
+
+    /**
+     * Inserisci una nuovo Show sapendo le sale
+     * @param show: titolo dello show
+     * @param cost: costo dello show
+     * @param listNumeroSale: lista di tutte le sale da dovergli aggiungere
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String inserNewShowAndKnowSala(String show, int cost, List&lt;Integer&gt; listNumeroSale) throws URISyntaxException{
+<span class="fc" id="L105">        String uri = &quot;http://localhost:8085/Teatro/addNewShowKnowSala?show=&quot;+show;</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        for(int i : listNumeroSale){</span>
+<span class="fc" id="L107">            uri = uri + &quot;&amp;listNumeroSale=&quot; + i;</span>
+<span class="fc" id="L108">        }</span>
+<span class="fc" id="L109">        uri = uri + &quot;&amp;cost=&quot; +cost;</span>
+<span class="fc" id="L110">        RequestEntity&lt;Spettacolo&gt; request = RequestEntity.method(HttpMethod.PUT, new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L111">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L112">        return response.getBody();</span>
+    }
+
+    /**
+     * Upset posto
+     * @param nameSpettacolo: titolo dello show
+     * @param numeroSala: numero della sala
+     * @param posto: posto da dover aggiornare
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String setPosto(String nameSpettacolo, int numeroSala, Posto posto) throws URISyntaxException{
+<span class="fc" id="L124">        String uri3 = &quot;http://localhost:8085/Teatro/&quot;+nameSpettacolo+&quot;/&quot;+numeroSala+&quot;/upsetPosto?colonna=&quot;+posto.getColonna()+&quot;&amp;free=&quot;+posto.getFree()+&quot;&amp;riga=&quot;+posto.getRiga();</span>
+<span class="fc" id="L125">        RequestEntity&lt;String&gt; request1 = RequestEntity.post(new URI(uri3)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L126">        ResponseEntity&lt;String&gt; response1 = restTemplate.exchange(request1, String.class);</span>
+<span class="fc" id="L127">        return response1.getBody();</span>
+    }
+
+    /**
+     * Permette l'inserimentodi un nuovo utente
+     * @param name: nome dell'utente
+     * @param surname: congome dell'utente
+     * @param saldo: saldo dell'utente
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String putNewUser(String name, String surname, int saldo)throws URISyntaxException{
+<span class="fc" id="L139">        String uri = &quot;http://localhost:8081/putNewUser?money=&quot;+saldo+&quot;&amp;name=&quot;+name+&quot;&amp;surname=&quot;+surname;</span>
+<span class="fc" id="L140">        RequestEntity&lt;String&gt; richiesta = RequestEntity.put(new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L141">        ResponseEntity&lt;String&gt; risposta = restTemplate.exchange(richiesta, String.class);</span>
+<span class="fc" id="L142">        return risposta.getBody();</span>
+    }
+
+    /**
+     * Permette di eliminare un utente
+     * @param id: id dell'utente
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String deleteUser(int id)throws URISyntaxException{
+<span class="fc" id="L152">        String uri = &quot;http://localhost:8081/deleteUser?id=&quot; + id;</span>
+<span class="fc" id="L153">        RequestEntity&lt;String&gt; request = RequestEntity.method(HttpMethod.DELETE, new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L154">        ResponseEntity&lt;String&gt; response = restTemplate.exchange(request, String.class);</span>
+<span class="fc" id="L155">        return response.getBody();</span>
+    }
+
+    /**
+     * Permette di aggiornare un utente
+     * @param id: id dell'utente
+     * @param name: nome del'utente
+     * @param surname: cognome dell'utente
+     * @param cash: soldi
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String upsetUser(int id, String name, String surname, int cash) throws URISyntaxException{
+<span class="fc" id="L168">        String uri = &quot;http://localhost:8081/upsetUser?id=&quot; + id + &quot;&amp;name=&quot; + name + &quot;&amp;surname=&quot; + surname + &quot;&amp;money=&quot; + cash;</span>
+<span class="fc" id="L169">        RequestEntity&lt;String&gt; richiesta = RequestEntity.post(new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L170">        ResponseEntity&lt;String&gt; risposta = restTemplate.exchange(richiesta, String.class);</span>
+<span class="fc" id="L171">        return risposta.getBody();</span>
+    }
+
+    /**
+     * Permette di aggiungere soldi ad una persona specifica
+     * @param id: id dell'utente
+     * @param soldi: soldi da dover aggiungere
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String addMoneyUser(int id, int soldi) throws URISyntaxException{
+<span class="fc" id="L182">        String uri = &quot;http://localhost:8081/&quot;+id+&quot;/addMoney?money=&quot;+soldi;</span>
+<span class="fc" id="L183">        RequestEntity&lt;String&gt; richiesta = RequestEntity.post(new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L184">        ResponseEntity&lt;String&gt; risposta = restTemplate.exchange(richiesta, String.class);</span>
+<span class="fc" id="L185">        return risposta.getBody();</span>
+    }
+
+    /**
+     * Rimuovi soldi da una persona
+     * @param id: id dell'utente
+     * @param money: soldi da dover rimuovere
+     * @return una stringa che indica se tutto andato bene o no
+     * @throws URISyntaxException
+     */
+    public String removeMoneyUser(int id, int money) throws URISyntaxException{
+<span class="fc" id="L196">        String uri = &quot;http://localhost:8081/&quot;+id+&quot;/removeMoney?money=&quot;+money;</span>
+<span class="fc" id="L197">        RequestEntity&lt;String&gt; richiesta = RequestEntity.post(new URI(uri)).accept(MediaType.APPLICATION_JSON).body(null);</span>
+<span class="fc" id="L198">        ResponseEntity&lt;String&gt; risposta = restTemplate.exchange(richiesta, String.class);</span>
+<span class="fc" id="L199">        return risposta.getBody();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
