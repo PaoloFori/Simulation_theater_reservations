@@ -1,0 +1,4 @@
+com\prenotazioni\utente\UtenteApplicationTests.class
+com\prenotazioni\utente\TestControllerCommand.class
+com\prenotazioni\utente\TestException.class
+com\prenotazioni\utente\TestControllerQuery.class

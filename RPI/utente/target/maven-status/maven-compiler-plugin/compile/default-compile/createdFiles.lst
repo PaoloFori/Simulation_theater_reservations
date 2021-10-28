@@ -1,0 +1,10 @@
+com\prenotazioni\utente\Controller\UserControllerCommand.class
+com\prenotazioni\utente\Services\UserServiceCommand.class
+com\prenotazioni\utente\Controller\UserControllerQuery.class
+com\prenotazioni\utente\Exception\ExceptionNoEnoughMoney.class
+com\prenotazioni\utente\Exception\ExceptionNoUser.class
+com\prenotazioni\utente\Entity\User.class
+com\prenotazioni\utente\Repository\UserRepository.class
+com\prenotazioni\utente\Config\ConfigSwagger.class
+com\prenotazioni\utente\UtenteApplication.class
+com\prenotazioni\utente\Services\UserServiceQuery.class

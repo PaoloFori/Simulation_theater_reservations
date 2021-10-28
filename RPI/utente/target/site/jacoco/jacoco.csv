@@ -1,0 +1,10 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+utente,com.prenotazioni.utente.Controller,UserControllerQuery,0,25,0,0,0,7,0,5,0,5
+utente,com.prenotazioni.utente.Controller,UserControllerCommand,0,68,0,0,0,19,0,6,0,6
+utente,com.prenotazioni.utente.Services,UserServiceQuery,0,34,0,2,0,8,0,6,0,5
+utente,com.prenotazioni.utente.Services,UserServiceCommand,2,166,4,14,0,42,4,11,0,6
+utente,com.prenotazioni.utente,UtenteApplication,5,85,0,0,2,11,1,2,1,2
+utente,com.prenotazioni.utente.Config,ConfigSwagger,0,34,0,0,0,9,0,3,0,3
+utente,com.prenotazioni.utente.Exception,ExceptionNoEnoughMoney,0,3,0,0,0,2,0,1,0,1
+utente,com.prenotazioni.utente.Exception,ExceptionNoUser,0,3,0,0,0,1,0,1,0,1
+utente,com.prenotazioni.utente.Entity,User,10,46,0,0,1,12,3,8,3,8
