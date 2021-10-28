@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">utente</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.utente.Services</a> &gt; <span class="el_source">UserServiceCommand.java</span></div><h1>UserServiceCommand.java</h1><pre class="source lang-java linenums">package com.prenotazioni.utente.Services;
+
+import java.util.Optional;
+
+import com.prenotazioni.utente.Entity.User;
+import com.prenotazioni.utente.Exception.ExceptionNoEnoughMoney;
+import com.prenotazioni.utente.Exception.ExceptionNoUser;
+import com.prenotazioni.utente.Repository.UserRepository;
+
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L16">public class UserServiceCommand {</span>
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    KafkaTemplate&lt;String, String&gt; template;
+
+    /**
+     * pubblica un messaggio sul topic User
+     * @param user: utente da passare
+     */
+    public void publishMessage(User user){
+<span class="fc" id="L28">        ProducerRecord&lt;String, String&gt; message = new ProducerRecord&lt;String,String&gt;(&quot;User&quot;, user.toString());</span>
+<span class="fc" id="L29">        template.send(message);</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Rimuovi un utente dall'id
+     * @param id: id dell'utente
+     * @return ritorna una stringa per dire se è andato tutto bene
+     * @throws ExceptionNoUser: se non esiste quell'utente
+     */
+    public String deleteById(int id) throws ExceptionNoUser{
+<span class="fc" id="L39">        Optional&lt;User&gt; userr = userRepository.findById(id);</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if(userr.isPresent()){</span>
+<span class="fc" id="L41">            User user = userr.get();</span>
+<span class="fc" id="L42">            userRepository.delete(user);</span>
+<span class="fc" id="L43">            return &quot;User delete correctly&quot;;</span>
+        }else{
+<span class="nc" id="L45">            throw new ExceptionNoUser();</span>
+        }
+    }
+
+    /**
+     * Inserisce nuovi utenti
+     * @param user: utente da inserire
+     * @return ritorna una stringa per dire se è andato tutto bene
+     */
+    public String insert(User user) {
+<span class="fc" id="L55">        userRepository.insert(user); </span>
+<span class="fc" id="L56">        return &quot;User add correctly!&quot;;</span>
+    }
+
+    /**
+     * Aggiorna utenti esistenti
+     * @param id: id dell'utente
+     * @param name: nome dell'utente
+     * @param surname: cognome dell'utente
+     * @param cash: soldi dell'utente
+     * @return ritorna una stringa per dire se è andato tutto bene
+     */
+    public String upset(int id, String name, String surname, int cash) throws ExceptionNoUser{
+<span class="fc" id="L68">        Optional&lt;User&gt; userr = userRepository.findById(id);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if(userr.isPresent()==true){</span>
+<span class="fc" id="L70">            User user = userr.get();</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if(name.equals(&quot;&quot;)==false){</span>
+<span class="fc" id="L72">                user.setName(name);</span>
+            }
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">            if(surname.equals(&quot;&quot;)==false){</span>
+<span class="fc" id="L75">                user.setSurname(surname);</span>
+            }
+<span class="pc bpc" id="L77" title="2 of 4 branches missed.">            if((cash == -1) == false) {</span>
+<span class="fc" id="L78">            	user.setCash(cash);</span>
+            }
+<span class="fc" id="L80">            userRepository.save(user);</span>
+<span class="fc" id="L81">            return &quot;User upset correctly!&quot;;</span>
+        }else{
+<span class="fc" id="L83">            throw new ExceptionNoUser(&quot;No User with this id&quot;);</span>
+        }
+    }
+
+    /**
+     * Rimuove soldi dall'user passato come ID
+     * @param id: id dell'utente
+     * @param soldi: soldi da rimuovre
+     * @return ritorna una stringa per dire se è andato tutto bene
+     * @throws ExceptionNoEnoughMoney: se non ha abbastanza soldi
+     * @throws ExceptionNoUser: se l'utente non esiste
+     */
+    public String removeCash(int id, int soldi) throws ExceptionNoEnoughMoney, ExceptionNoUser{
+<span class="fc" id="L96">        Optional&lt;User&gt; userr = userRepository.findById(id);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if(userr.isPresent()){</span>
+<span class="fc" id="L98">            User user = userr.get();</span>
+<span class="fc" id="L99">            int money = user.getCash();</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">            if((money-soldi) &lt; 0){ //non ha a sufficienza i soldi</span>
+<span class="fc" id="L101">                throw new ExceptionNoEnoughMoney(&quot;No enougth money!!&quot;);</span>
+            }
+<span class="fc" id="L103">            soldi = money-soldi;</span>
+<span class="fc" id="L104">            user.setCash(soldi);</span>
+<span class="fc" id="L105">            userRepository.save(user);</span>
+<span class="fc" id="L106">            return &quot;User has enogth money. The now money are: &quot; + soldi;</span>
+        }else{
+<span class="fc" id="L108">            throw new ExceptionNoUser(&quot;No user in DB&quot;);</span>
+        }
+    }
+
+    /**
+     * Aggiunge soldi all'User passato come id
+     * @param id: id dell'utente
+     * @param money: soldi da aggiungere
+     * @return ritorna una stringa per dire se è andato tutto bene
+     * @throws ExceptionNoUser: se non esiste l'utente
+     */
+    public String addCash(int id, int money) throws ExceptionNoUser{
+<span class="fc" id="L120">        Optional&lt;User&gt; userr = userRepository.findById(id);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if(userr.isPresent()){</span>
+<span class="fc" id="L122">            User user = userr.get();</span>
+<span class="fc" id="L123">            int soldi = user.getCash();</span>
+<span class="fc" id="L124">            soldi = soldi + money;</span>
+<span class="fc" id="L125">            user.setCash(soldi);</span>
+<span class="fc" id="L126">            userRepository.save(user);</span>
+<span class="fc" id="L127">            return &quot;User money now are: &quot; + soldi;</span>
+        }else{
+<span class="fc" id="L129">            throw new ExceptionNoUser(&quot;No user in DB&quot;);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

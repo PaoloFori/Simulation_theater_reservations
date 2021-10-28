@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserControllerQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">utente</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.utente.Controller</a> &gt; <span class="el_source">UserControllerQuery.java</span></div><h1>UserControllerQuery.java</h1><pre class="source lang-java linenums">package com.prenotazioni.utente.Controller;
+
+import java.util.List;
+
+import com.prenotazioni.utente.Entity.User;
+import com.prenotazioni.utente.Exception.ExceptionNoUser;
+import com.prenotazioni.utente.Services.UserServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L15">public class UserControllerQuery {</span>
+    
+    @Autowired
+    UserServiceQuery userServiceQuery;
+    
+     /**
+     * Return all user with the same surname
+     * @param surname: surname of user
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(&quot;/userSurname&quot;)
+    public List&lt;User&gt; getAllUserBySurname(@RequestParam(value = &quot;surname&quot;) String surname){
+<span class="fc" id="L27">        return userServiceQuery.getBySurname(surname);</span>
+    }
+
+    /**
+     * Return a single User with that id
+     * @param id: id of user
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(&quot;/userId&quot;)
+    public String getUserById(@RequestParam(value = &quot;userId&quot;) int id){
+        try{
+<span class="fc" id="L38">            return userServiceQuery.getUserById(id).toString();</span>
+<span class="fc" id="L39">        }catch(ExceptionNoUser e){</span>
+<span class="fc" id="L40">            return &quot;No user with this id&quot;;</span>
+        }
+    }
+
+    /**
+     * Return all the user in the DB
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(&quot;/users&quot;)
+    public List&lt;User&gt; getAllUser(){
+<span class="fc" id="L50">        return userServiceQuery.getAll();</span>
+    }
+    
+    /**
+     * Return all user with the same name
+     * @param name: name of user
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(&quot;/userName&quot;)
+    public List&lt;User&gt; getAllUserByName(@RequestParam(value =&quot;name&quot;) String name){
+<span class="fc" id="L60">        return userServiceQuery.getByName(name);</span>
+    }
+
+    /**
+     * Return all user with the same name and surname
+     * @param name: name of user
+     * @param surname: surname of user
+     * @return a string where I say if everything is fine
+     */
+    @GetMapping(&quot;/userNameAndSurname&quot;)
+    public List&lt;User&gt; getAllUserByNameAndSurname(@RequestParam(value =&quot;name&quot;) String name, @RequestParam(value = &quot;surname&quot;)String surname){
+<span class="fc" id="L71">        return userServiceQuery.getAllUserByNameAndSurname(name, surname);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

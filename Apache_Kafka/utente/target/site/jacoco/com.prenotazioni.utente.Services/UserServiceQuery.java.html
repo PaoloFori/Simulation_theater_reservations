@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">utente</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.utente.Services</a> &gt; <span class="el_source">UserServiceQuery.java</span></div><h1>UserServiceQuery.java</h1><pre class="source lang-java linenums">package com.prenotazioni.utente.Services;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import com.prenotazioni.utente.Entity.User;
+import com.prenotazioni.utente.Exception.ExceptionNoUser;
+import com.prenotazioni.utente.Repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L15">public class UserServiceQuery {</span>
+    @Autowired
+    UserRepository userRepository;
+
+    /**
+     * Ritorna tutti gli utenti presenti nel database
+     * @return lista di tutti gli utenti
+     */
+    public List&lt;User&gt; getAll() {
+<span class="fc" id="L24">        return userRepository.findAll();</span>
+    }
+
+    /**
+     * Ritorna determinati utenti
+     * @param name: nome dell'utente
+     * @return ritorna una lista con gli utenti con lo stesso nome
+     */
+    public List&lt;User&gt; getByName(String name) {
+<span class="fc" id="L33">        return userRepository.findByName(name);</span>
+    }
+    
+    /**
+     * Ritorna determinati utenti
+     * @param surname: cognome dell'utente
+     * @return ritorna una lista con gli utenti con lo stesso cognome
+     */
+    public List&lt;User&gt; getBySurname(String surname) {
+<span class="fc" id="L42">        return userRepository.findBySurname(surname);</span>
+    }
+
+     /**
+     * Ritorna l'utente se esso c'è
+     * @param id: id dell'utente
+     * @return ritorna l'utente
+     * @throws ExceptionNoUser: se l'utente non è presente
+     */
+    public User getUserById(int id) throws ExceptionNoUser{
+<span class="fc" id="L52">        Optional&lt;User&gt; user = userRepository.findById(id);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if(user.isPresent()){</span>
+<span class="fc" id="L54">            return user.get();   </span>
+        }
+<span class="fc" id="L56">        throw new ExceptionNoUser();</span>
+    }
+
+    /**
+     * Ritorna tutti gli utenticon stesso nome e cognome
+     * @param name: nome degli utenti
+     * @param surname: cognome degli utenti
+     * @return lista di utenti o lista vuota
+     */
+    public List&lt;User&gt; getAllUserByNameAndSurname(String name, String surname){
+<span class="fc" id="L66">        List&lt;User&gt; userName = userRepository.findByName(name);</span>
+<span class="fc" id="L67">        List&lt;User&gt; user = new ArrayList&lt;&gt;();</span>
+        User user1;
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        for(int i = 0; i &lt; userName.size(); i++){</span>
+<span class="fc" id="L70">            user1 = userName.get(i);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            if(user1.getSurname().equals(surname)){</span>
+<span class="fc" id="L72">                user.add(user1);</span>
+            }
+        }
+<span class="fc" id="L75">        return user;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

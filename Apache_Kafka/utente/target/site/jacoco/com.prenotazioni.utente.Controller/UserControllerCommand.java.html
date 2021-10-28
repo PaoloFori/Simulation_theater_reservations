@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="it"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserControllerCommand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">utente</a> &gt; <a href="index.source.html" class="el_package">com.prenotazioni.utente.Controller</a> &gt; <span class="el_source">UserControllerCommand.java</span></div><h1>UserControllerCommand.java</h1><pre class="source lang-java linenums">package com.prenotazioni.utente.Controller;
+
+import java.util.List;
+
+import com.prenotazioni.utente.Entity.User;
+import com.prenotazioni.utente.Exception.ExceptionNoEnoughMoney;
+import com.prenotazioni.utente.Exception.ExceptionNoUser;
+import com.prenotazioni.utente.Services.UserServiceCommand;
+import com.prenotazioni.utente.Services.UserServiceQuery;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+<span class="fc" id="L20">public class UserControllerCommand {</span>
+    @Autowired
+    UserServiceCommand userServiceCommand;
+
+    @Autowired
+    UserServiceQuery userServiceQuery;
+
+    /**
+     * We need to know the id. It use to change: name or surname or money.
+     * @param id: id of user
+     * @param name: name of user
+     * @param surname: surname of user
+     * @param cash: money of user
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/upsetUser&quot;)
+    public String upset(@RequestParam(&quot;id&quot;) int id, @RequestParam(value = &quot;name&quot;, defaultValue = &quot;&quot;) String name, 
+                        @RequestParam(value= &quot;surname&quot;, defaultValue = &quot;&quot;) String surname, 
+                        @RequestParam(value= &quot;money&quot;, defaultValue = &quot;-1&quot;) int cash){
+        try{ 
+<span class="fc" id="L40">            String s = userServiceCommand.upset(id, name, surname, cash);</span>
+<span class="fc" id="L41">            User user = userServiceQuery.getUserById(id);</span>
+<span class="fc" id="L42">            user.setAction(&quot;Upset&quot;);</span>
+<span class="fc" id="L43">            userServiceCommand.publishMessage(user);</span>
+<span class="fc" id="L44">            return s;</span>
+<span class="fc" id="L45">        }catch(ExceptionNoUser e){</span>
+<span class="fc" id="L46">            return &quot;No User with this id&quot;;</span>
+        }
+    }
+
+    /**
+     * We need to know the param, not the ID, because it is specific for the single user
+     * @param name: name of user
+     * @param surname: surname of user
+     * @param cash: cash of user
+     * @return a string where I say if everything is fine
+     */
+    @PutMapping(&quot;/putNewUser&quot;)
+    public String insert(@RequestParam(value = &quot;name&quot;) String name, @RequestParam(value= &quot;surname&quot;) String surname, @RequestParam(value= &quot;money&quot;) int cash){
+<span class="fc" id="L59">        List&lt;User&gt; userr = userServiceQuery.getAll();</span>
+        User user;
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if(userr.size() == 0){</span>
+<span class="nc" id="L62">            user = userr.get(0);</span>
+        }else{
+<span class="fc" id="L64">            user = userr.get(userr.size() - 1);</span>
+        }
+<span class="fc" id="L66">        int size = user.getId() + 1;</span>
+<span class="fc" id="L67">        User user1 = new User(size, name, surname, cash, &quot;Add New&quot;);  </span>
+<span class="fc" id="L68">        userServiceCommand.publishMessage(user1);</span>
+<span class="fc" id="L69">        return userServiceCommand.insert(user1);</span>
+    }
+
+    /**
+     * Remove money from a User. 
+     * @param id: id of user
+     * @param cash: cash of user
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/{userId}/removeMoney&quot;)
+    public String removeMoney(@PathVariable(&quot;userId&quot;) int id, @RequestParam(value = &quot;money&quot;) int money){
+        try{
+<span class="fc" id="L81">            String s = userServiceCommand.removeCash(id, money);</span>
+<span class="fc" id="L82">            User user = userServiceQuery.getUserById(id);</span>
+<span class="fc" id="L83">            user.setAction(&quot;Remove Money&quot;);</span>
+<span class="fc" id="L84">            userServiceCommand.publishMessage(user);</span>
+<span class="fc" id="L85">            return s;</span>
+<span class="fc" id="L86">        }catch(ExceptionNoEnoughMoney e1){</span>
+<span class="fc" id="L87">            return &quot;No enough money&quot;;</span>
+<span class="fc" id="L88">        }catch(ExceptionNoUser e2){</span>
+<span class="fc" id="L89">            return &quot;No user with this id&quot;;</span>
+        }
+    }
+
+    /**
+     * Add money to a specific User
+     * @param id: id of user
+     * @param money: money of user
+     * @return a string where I say if everything is fine
+     */
+    @PostMapping(&quot;/{userId}/addMoney&quot;)
+    public String addMoney(@PathVariable(&quot;userId&quot;) int id, @RequestParam(value = &quot;money&quot;) int money){
+        try{
+<span class="fc" id="L102">            String s = userServiceCommand.addCash(id, money);</span>
+<span class="fc" id="L103">            User user = userServiceQuery.getUserById(id);</span>
+<span class="fc" id="L104">            user.setAction(&quot;Add Money&quot;);</span>
+<span class="fc" id="L105">            userServiceCommand.publishMessage(user);</span>
+<span class="fc" id="L106">            return s;</span>
+<span class="fc" id="L107">        }catch(ExceptionNoUser e){</span>
+<span class="fc" id="L108">            return &quot;No user with this id&quot;;</span>
+        }
+    }
+
+    /**
+     * Remove a determinate User
+     * @param id: id of user
+     * @return a string where I say if everything is fine
+     */
+    @DeleteMapping(&quot;/deleteUser&quot;)
+    public String deleteUser(@RequestParam(value = &quot;id&quot;)int id){
+        try{
+<span class="fc" id="L120">            User user = userServiceQuery.getUserById(id);</span>
+<span class="fc" id="L121">            String s = userServiceCommand.deleteById(id);</span>
+<span class="fc" id="L122">            user.setAction(&quot;Delete&quot;);</span>
+<span class="fc" id="L123">            userServiceCommand.publishMessage(user);</span>
+<span class="fc" id="L124">            return s;</span>
+<span class="fc" id="L125">        }catch(ExceptionNoUser e){</span>
+<span class="fc" id="L126">            return &quot;no User with this id&quot;;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
